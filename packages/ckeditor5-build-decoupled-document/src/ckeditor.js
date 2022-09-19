@@ -43,7 +43,35 @@ import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
 import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
 
+import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/image.svg';
+import IframeEmbed from './ckeditor5-iframe/iframeembed';
+
 export default class DecoupledEditor extends DecoupledEditorBase {}
+
+class InsertAsset extends Plugin {
+	init() {
+		const editor = this.editor;
+
+		editor.ui.componentFactory.add( 'insertAsset', locale => {
+			const view = new ButtonView( locale );
+
+			view.set( {
+				label: 'Insert Assets',
+				icon: imageIcon,
+				tooltip: true
+			} );
+
+			view.on( 'execute', () => {
+				// eslint-disable-next-line no-undef
+				WIKI.$store.set( 'editor/activeModal', 'editorModalMedia' );
+			} );
+
+			return view;
+		} );
+	}
+}
 
 // Plugins to include in the build.
 DecoupledEditor.builtinPlugins = [
@@ -72,6 +100,8 @@ DecoupledEditor.builtinPlugins = [
 	ImageToolbar,
 	ImageUpload,
 	Indent,
+	InsertAsset,
+	IframeEmbed,
 	IndentBlock,
 	Link,
 	List,
@@ -111,9 +141,10 @@ DecoupledEditor.defaultConfig = {
 			'|',
 			'link',
 			'blockquote',
-			'uploadImage',
+			'insertAsset',
 			'insertTable',
-			'mediaEmbed',
+			// 'mediaEmbed',
+			'iframeEmbed',
 			'|',
 			'undo',
 			'redo'
