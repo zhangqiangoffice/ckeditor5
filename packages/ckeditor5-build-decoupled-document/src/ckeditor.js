@@ -47,6 +47,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/image.svg';
 import IframeEmbed from './ckeditor5-iframe/iframeembed';
+import HorizontalLine from '@ckeditor/ckeditor5-horizontal-line/src/horizontalline';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -93,6 +94,7 @@ DecoupledEditor.builtinPlugins = [
 	CloudServices,
 	EasyImage,
 	Heading,
+	HorizontalLine,
 	Image,
 	ImageCaption,
 	ImageResize,
@@ -132,7 +134,7 @@ DecoupledEditor.defaultConfig = {
 			'strikethrough',
 			'|',
 			'alignment',
-			'|',
+			'-',
 			'numberedList',
 			'bulletedList',
 			'|',
@@ -145,10 +147,12 @@ DecoupledEditor.defaultConfig = {
 			'insertTable',
 			// 'mediaEmbed',
 			'iframeEmbed',
+			'horizontalLine',
 			'|',
 			'undo',
 			'redo'
-		]
+		],
+		shouldNotGroupWhenFull: true
 	},
 	image: {
 		resizeUnit: 'px',
