@@ -50,6 +50,7 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/image.svg';
 import IframeEmbed from './ckeditor5-iframe/iframeembed';
 import HorizontalLine from '@ckeditor/ckeditor5-horizontal-line/src/horizontalline';
+import TableColumnResize from '@ckeditor/ckeditor5-table/src/tablecolumnresize';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -118,6 +119,7 @@ DecoupledEditor.builtinPlugins = [
 	TableCellProperties,
 	TableProperties,
 	TableToolbar,
+	TableColumnResize,
 	TextTransformation
 ];
 
