@@ -51,6 +51,8 @@ import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/image.svg';
 import IframeEmbed from './ckeditor5-iframe/iframeembed';
 import HorizontalLine from '@ckeditor/ckeditor5-horizontal-line/src/horizontalline';
 import TableColumnResize from '@ckeditor/ckeditor5-table/src/tablecolumnresize';
+import HtmlEmbed from '@ckeditor/ckeditor5-html-embed/src/htmlembed';
+import SourceEditing from '@ckeditor/ckeditor5-source-editing/src/sourceediting';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -98,6 +100,7 @@ DecoupledEditor.builtinPlugins = [
 	EasyImage,
 	Heading,
 	HorizontalLine,
+	HtmlEmbed,
 	Image,
 	ImageCaption,
 	ImageResize,
@@ -115,6 +118,7 @@ DecoupledEditor.builtinPlugins = [
 	Paragraph,
 	PasteFromOffice,
 	PictureEditing,
+	SourceEditing,
 	Table,
 	TableCellProperties,
 	TableProperties,
@@ -155,6 +159,9 @@ DecoupledEditor.defaultConfig = {
 			'iframeEmbed',
 			'horizontalLine',
 			'|',
+			'htmlEmbed',
+			'sourceediting',
+			'|',
 			'undo',
 			'redo'
 		],
@@ -188,5 +195,9 @@ DecoupledEditor.defaultConfig = {
 		}
 	},
 	// This value must be kept in sync with the language defined in webpack.config.js.
-	language: 'zh-cn'
+	language: 'zh-cn',
+	htmlEmbed: {
+		showPreviews: true,
+		sanitizeHtml: html => ( { html, hasChange: false } )
+	}
 };
