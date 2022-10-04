@@ -199,5 +199,24 @@ DecoupledEditor.defaultConfig = {
 	htmlEmbed: {
 		showPreviews: true,
 		sanitizeHtml: html => ( { html, hasChange: false } )
+	},
+	fontFamily: {
+		options: [
+			'default',
+			'Arial, Helvetica, sans-serif',
+			'Courier New, Courier, monospace',
+			'Georgia, serif',
+			'Lucida Sans Unicode, Lucida Grande, sans-serif',
+			'Tahoma, Geneva, sans-serif',
+			'Times New Roman, Times, serif',
+			'Trebuchet MS, Helvetica, sans-serif',
+			'Verdana, Geneva, sans-serif',
+			'宋体, SimSun',
+			'新宋体, NSimSun',
+			'仿宋_GB2312, FangSong_GB2312',
+			'楷体_GB2312, KaiTi_GB2312',
+			'黑体, SimHei, Heiti SC',
+			'微软雅黑, Microsoft YaHei'
+		]
 	}
 };
