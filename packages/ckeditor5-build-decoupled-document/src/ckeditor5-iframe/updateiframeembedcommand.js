@@ -34,13 +34,15 @@ export default class UpdateIframeEmbedCommand extends Command {
    * @fires execute
    * @param {String} value iframe as a string.
    */
-	execute( value ) {
+	execute( value, height, width ) {
 		const model = this.editor.model;
 		const selection = model.document.selection;
 		const selectedRawHtmlElement = getSelectedRawHtmlModelWidget( selection );
 
 		model.change( writer => {
 			writer.setAttribute( 'value', value, selectedRawHtmlElement );
+			writer.setAttribute( 'height', height, selectedRawHtmlElement );
+			writer.setAttribute( 'width', width, selectedRawHtmlElement );
 		} );
 	}
 }

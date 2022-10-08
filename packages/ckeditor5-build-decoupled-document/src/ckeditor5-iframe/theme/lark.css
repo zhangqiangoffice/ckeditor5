@@ -84,6 +84,10 @@
 
 	& .iframe-embed__content-wrapper {
 		padding: var(--ck-spacing-standard);
+
+		& .iframe_form_wrapper {
+			margin-top: var(--ck-spacing-standard);
+		}
 	}
 
 	/* The switch mode button wrapper. */
@@ -137,9 +141,21 @@
 		}
 	}
 
+	& .iframe-embed_style {
+		margin-right: calc(var(--ck-spacing-standard) * 2);
+
+		&[disabled] {
+			background: var(--ck-video-embed-source-disabled-background);
+			color: var(--ck-video-embed-source-disabled-color);
+
+			-webkit-text-fill-color: var(--ck-video-embed-source-disabled-color);
+			opacity: 1;
+		}
+	}
+
 	/* The preview data container. */
 	& .iframe-embed__preview {
-		min-height: var(--ck-iframe-embed-content-min-height);
+		/* min-height: var(--ck-iframe-embed-content-min-height); */
 		width: var(--ck-iframe-embed-content-width);
 
 		/* Disable all mouse interaction as long as the editor is not read–only. */

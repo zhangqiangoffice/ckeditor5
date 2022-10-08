@@ -33,7 +33,7 @@ export default class IframeEmbedUI extends Plugin {
 			const view = new ButtonView( locale );
 
 			view.set( {
-				label: t( 'Embed link' ),
+				label: t( '插入 iframe' ),
 				icon: iframeEmbedIcon,
 				tooltip: true
 			} );

@@ -137,7 +137,7 @@ export default class VideoEmbedEditing extends Plugin {
 
 				const viewContainer = writer.createContainerElement( 'figure', {
 					class: 'video-embed',
-					'data-video-embed-label': t( 'Video Link' ),
+					'data-video-embed-label': t( 'Video 资源地址' ),
 					dir: editor.locale.uiLanguageDirection
 				} );
 
@@ -246,7 +246,7 @@ export default class VideoEmbedEditing extends Plugin {
 
 				props = {
 					sanitizeHtml: videoEmbedConfig.sanitizeHtml,
-					textareaPlaceholder: t( '输入 video 的资源链接，例如：https://.../demo.mp4' ),
+					textareaPlaceholder: t( '输入 video 的资源地址，例如：https://.../demo.mp4' ),
 
 					onEditClick() {
 						videoApi.makeEditable();
@@ -268,7 +268,7 @@ export default class VideoEmbedEditing extends Plugin {
 				writer.setCustomProperty( 'video', true, viewContainer );
 
 				return toWidget( viewContainer, writer, {
-					widgetLabel: t( 'Video Link' ),
+					widgetLabel: t( 'Video 资源地址' ),
 					hasSelectionHandle: true
 				} );
 			}

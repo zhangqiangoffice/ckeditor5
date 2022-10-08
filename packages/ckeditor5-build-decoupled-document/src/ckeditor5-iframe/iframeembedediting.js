@@ -63,7 +63,7 @@ export default class IframeEmbedEditing extends Plugin {
 		schema.register( 'iframe', {
 			isObject: true,
 			allowWhere: '$block',
-			allowAttributes: [ 'value' ]
+			allowAttributes: [ 'value', 'height', 'width' ]
 		} );
 
 		editor.commands.add(
@@ -99,7 +99,9 @@ export default class IframeEmbedEditing extends Plugin {
 				// The figure.iframe-embed is registered as a raw content element,
 				// so all it's content is available in a custom property.
 				return writer.createElement( 'iframe', {
-					value: viewElement.getChild( 0 ).getAttribute( 'src' )
+					value: viewElement.getChild( 0 ).getAttribute( 'src' ),
+					height: viewElement.getChild( 0 ).getAttribute( 'height' ),
+					width: viewElement.getChild( 0 ).getAttribute( 'width' )
 				} );
 			}
 		} );
@@ -108,12 +110,14 @@ export default class IframeEmbedEditing extends Plugin {
 			model: 'iframe',
 			view: ( modelElement, { writer } ) => {
 				const url = modelElement.getAttribute( 'value' ) || '';
+				const height = modelElement.getAttribute( 'height' ) || '350px';
+				const width = modelElement.getAttribute( 'width' ) || '100%';
 				const embedElement = writer.createContainerElement( 'figure', {
 					class: 'iframe-embed'
 				} );
 				writer.insert(
 					writer.createPositionAt( embedElement, 0 ),
-					writer.createRawElement( 'iframe', { src: url } )
+					writer.createRawElement( 'iframe', { src: url, height, width } )
 				);
 				return embedElement;
 			}
@@ -121,7 +125,7 @@ export default class IframeEmbedEditing extends Plugin {
 
 		editor.conversion.for( 'editingDowncast' ).elementToElement( {
 			triggerBy: {
-				attributes: [ 'value' ]
+				attributes: [ 'value', 'height', 'width' ]
 			},
 			model: 'iframe',
 			view: ( modelElement, { writer } ) => {
@@ -129,7 +133,7 @@ export default class IframeEmbedEditing extends Plugin {
 
 				const viewContainer = writer.createContainerElement( 'figure', {
 					class: 'iframe-embed',
-					'data-iframe-embed-label': t( 'Embed link' ),
+					'data-iframe-embed-label': t( 'Iframe 链接' ),
 					dir: editor.locale.uiLanguageDirection
 				} );
 
@@ -194,11 +198,13 @@ export default class IframeEmbedEditing extends Plugin {
 						// This could be potentially pulled to a separate method called focusTextarea().
 						domContentWrapper.querySelector( 'input' ).focus();
 					},
-					save( newValue ) {
+					save( newValue, newHeight, newWidth ) {
 						// If the value didn't change, we just cancel. If it changed,
 						// it's enough to update the model – the entire widget will be reconverted.
-						if ( newValue !== state.getRawHtmlValue() ) {
-							editor.execute( 'updateIframeEmbed', newValue );
+						if ( newValue !== state.getRawHtmlValue() ||
+						newHeight !== state.getRawHtmlHeight() || newWidth !== state.getRawHtmlWidth() ) {
+							editor.execute( 'updateIframeEmbed', newValue, newHeight, newWidth );
+							this.cancel();
 							editor.editing.view.focus();
 						} else {
 							this.cancel();
@@ -229,18 +235,20 @@ export default class IframeEmbedEditing extends Plugin {
 				state = {
 					showPreviews: iframeEmbedConfig.showPreviews,
 					isEditable: false,
-					getRawHtmlValue: () => modelElement.getAttribute( 'value' ) || ''
+					getRawHtmlValue: () => modelElement.getAttribute( 'value' ) || '',
+					getRawHtmlHeight: () => modelElement.getAttribute( 'height' ) || '350px',
+					getRawHtmlWidth: () => modelElement.getAttribute( 'width' ) || '100%'
 				};
 
 				props = {
 					sanitizeHtml: iframeEmbedConfig.sanitizeHtml,
-					textareaPlaceholder: t( 'Paste in https://...' ),
+					textareaPlaceholder: t( '填写 iframe 的链接，例如：https://...' ),
 
 					onEditClick() {
 						iframeApi.makeEditable();
 					},
-					onSaveClick( newValue ) {
-						iframeApi.save( newValue );
+					onSaveClick( newValue, newHeight, newWidth ) {
+						iframeApi.save( newValue, newHeight, newWidth );
 					},
 					onCancelClick() {
 						iframeApi.cancel();
@@ -256,7 +264,7 @@ export default class IframeEmbedEditing extends Plugin {
 				writer.setCustomProperty( 'iframe', true, viewContainer );
 
 				return toWidget( viewContainer, writer, {
-					widgetLabel: t( 'Embed link' ),
+					widgetLabel: t( 'Iframe 链接' ),
 					hasSelectionHandle: true
 				} );
 			}
@@ -268,6 +276,8 @@ export default class IframeEmbedEditing extends Plugin {
 
 			const domDocument = domElement.ownerDocument;
 			let domTextarea;
+			let domInputHeight;
+			let domInputWidth;
 
 			if ( state.isEditable ) {
 				const textareaProps = {
@@ -281,7 +291,35 @@ export default class IframeEmbedEditing extends Plugin {
 					props: textareaProps
 				} );
 
+				const domLabelHeight = createElement( domDocument, 'span', { class: 'video_style_label' }, '高度：' );
+
+				domInputHeight = createDomInput( {
+					domDocument,
+					props: {
+						isDisabled: false,
+						value: state.getRawHtmlHeight()
+					}
+				} );
+
+				const domLabelWidth = createElement( domDocument, 'span', { class: 'video_style_label' }, '宽度：' );
+
+				domInputWidth = createDomInput( {
+					domDocument,
+					props: {
+						isDisabled: false,
+						value: state.getRawHtmlWidth()
+					}
+				} );
+
+				const domFormWrapper = createElement(
+					domDocument,
+					'div',
+					{ class: 'iframe_form_wrapper' },
+					[ domLabelHeight, domInputHeight, domLabelWidth, domInputWidth ]
+				);
+
 				domElement.append( domTextarea );
+				domElement.append( domFormWrapper );
 			} else if ( state.showPreviews ) {
 				const previewContainerProps = {
 					sanitizeHtml: props.sanitizeHtml
@@ -309,7 +347,7 @@ export default class IframeEmbedEditing extends Plugin {
 			const buttonsWrapperProps = {
 				onEditClick: props.onEditClick,
 				onSaveClick: () => {
-					props.onSaveClick( domTextarea.value );
+					props.onSaveClick( domTextarea.value, domInputHeight.value, domInputWidth.value );
 				},
 				onCancelClick: props.onCancelClick
 			};
@@ -375,8 +413,23 @@ export default class IframeEmbedEditing extends Plugin {
 			return domTextarea;
 		}
 
+		function createDomInput( { domDocument, props } ) {
+			const domInput = createElement( domDocument, 'input', {
+				type: 'text',
+				placeholder: '例如：350px ，或者 auto',
+				class: 'ck ck-reset ck-input ck-input-text iframe-embed_style'
+			} );
+
+			domInput.disabled = props.isDisabled;
+			domInput.value = props.value;
+
+			return domInput;
+		}
+
 		function createPreviewContainer( { domDocument, state, props, editor } ) {
 			const sanitizedOutput = props.sanitizeHtml( state.getRawHtmlValue() );
+			const sanitizedOutputHeight = props.sanitizeHtml( state.getRawHtmlHeight() );
+			const sanitizedOutputWidth = props.sanitizeHtml( state.getRawHtmlWidth() );
 			const placeholderText =
 				state.getRawHtmlValue().length > 0 ?
 					t( 'No preview available' ) :
@@ -396,7 +449,8 @@ export default class IframeEmbedEditing extends Plugin {
 				dir: editor.locale.contentLanguageDirection
 			} );
 
-			domPreviewContent.innerHTML = `<iframe src="${ sanitizedOutput.html }"></iframe>`;
+			domPreviewContent.innerHTML = `<iframe src="${ sanitizedOutput.html }" 
+			height="${ sanitizedOutputHeight.html }" width="${ sanitizedOutputWidth.html }"></iframe>`;
 
 			const domPreviewContainer = createElement(
 				domDocument,
