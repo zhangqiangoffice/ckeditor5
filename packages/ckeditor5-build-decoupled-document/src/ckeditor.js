@@ -53,6 +53,7 @@ import HorizontalLine from '@ckeditor/ckeditor5-horizontal-line/src/horizontalli
 import TableColumnResize from '@ckeditor/ckeditor5-table/src/tablecolumnresize';
 import HtmlEmbed from '@ckeditor/ckeditor5-html-embed/src/htmlembed';
 import SourceEditing from '@ckeditor/ckeditor5-source-editing/src/sourceediting';
+import VideoEmbed from './ckeditor5-video/videoembed';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -124,7 +125,8 @@ DecoupledEditor.builtinPlugins = [
 	TableProperties,
 	TableToolbar,
 	TableColumnResize,
-	TextTransformation
+	TextTransformation,
+	VideoEmbed
 ];
 
 // Editor configuration.
@@ -157,6 +159,7 @@ DecoupledEditor.defaultConfig = {
 			'insertTable',
 			// 'mediaEmbed',
 			'iframeEmbed',
+			'videoEmbed',
 			'horizontalLine',
 			'|',
 			'htmlEmbed',
@@ -218,5 +221,11 @@ DecoupledEditor.defaultConfig = {
 			'黑体, SimHei, Heiti SC',
 			'微软雅黑, Microsoft YaHei'
 		]
+	},
+	iframeEmbed: {
+		showPreviews: true
+	},
+	videoEmbed: {
+		showPreviews: true
 	}
 };

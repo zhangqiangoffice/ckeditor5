@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) 2022, Zhang Qiang. All rights reserved.
+ */
+
+/* The feature container. */
+.ck-widget.video-embed {
+	--ck-video-embed-source-height: initial;
+	--ck-video-embed-source-width: calc(100% - var(--ck-icon-size) * 2.75);
+	--ck-video-embed-content-min-height: 20rem;
+	--ck-video-embed-content-min-width: initial;
+
+	& .video-embed__source {
+		height: var(--ck-video-embed-source-height);
+		&:not(:disabled) {
+			width: var(--ck-video-embed-source-width);
+		}
+	}
+
+	/* Give the embed some air. */
+	margin: 1em auto;
+	position: relative;
+	display: flow-root;
+
+	/* ----- Emebed label in the upper left corner ----------------------------------------------- */
+
+	&::before {
+		position: absolute;
+
+		/* Make sure the content does not cover the label. */
+		z-index: 1;
+	}
+
+	/* ----- Emebed internals --------------------------------------------------------------------- */
+
+	/* The switch mode button wrapper. */
+	& .video-embed__buttons-wrapper {
+		position: absolute;
+		display: flex;
+		flex-direction: row;
+	}
+
+	& .video-embed__preview {
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		/* min-height: var(--ck-video-embed-content-min-height); */
+		min-width: var(--ck-video-embed-content-min-width);
+	}
+
+	& .video-embed__preview-content {
+		width: 100%;
+		margin: auto;
+
+		/* Gives spacing to the small renderable elements, so they always cover the placeholder. */
+		border-collapse: separate;
+		border-spacing: 7px;
+	}
+
+	& .video-embed__preview-placeholder {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: -1;
+	}
+}
+
+.ck-content .video-embed {
+	/* Give the embed some air. */
+	margin: 1em 0;
+
+	/* Give the html embed some minimal width in the content to prevent them
+	from being "squashed" in tight spaces, e.g. in table cells (https://github.com/ckeditor/ckeditor5/issues/8331) */
+	min-width: 15em;
+
+	/* Don't inherit the style, e.g. when in a block quote. */
+	font-style: normal;
+}
