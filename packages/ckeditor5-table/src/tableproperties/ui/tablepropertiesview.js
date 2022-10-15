@@ -38,7 +38,9 @@ import '../../../theme/tableproperties.css';
 
 const ALIGNMENT_ICONS = {
 	left: icons.objectLeft,
+	blockLeft: icons.objectBlockLeft,
 	center: icons.objectCenter,
+	blockRight: icons.objectBlockRight,
 	right: icons.objectRight
 };
 
@@ -728,9 +730,9 @@ export default class TablePropertiesView extends View {
 
 		// Returns object with a proper order of labels.
 		if ( locale.uiLanguageDirection === 'rtl' ) {
-			return { right, center, left };
+			return { right, blockRight: right, center, blockLeft: left, left };
 		} else {
-			return { left, center, right };
+			return { left, blockLeft: left, center, blockRight: right, right };
 		}
 	}
 }

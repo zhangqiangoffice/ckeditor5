@@ -26,8 +26,9 @@ import TableHeightCommand from './commands/tableheightcommand';
 import TableAlignmentCommand from './commands/tablealignmentcommand';
 import { getNormalizedDefaultProperties } from '../utils/table-properties';
 
-const ALIGN_VALUES_REG_EXP = /^(left|center|right)$/;
+const ALIGN_VALUES_REG_EXP = /^(left|center|right|blockLeft|blockRight)$/;
 const FLOAT_VALUES_REG_EXP = /^(left|none|right)$/;
+const MARGIN_VALUES_REG_EXP = /^(0|none|0px)$/;
 
 /**
  * The table properties editing feature.
@@ -159,13 +160,33 @@ function enableAlignmentProperty( schema, conversion, defaultValue ) {
 				name: 'table',
 				key: 'tableAlignment'
 			},
-			view: alignment => ( {
-				key: 'style',
-				value: {
-					// Model: `alignment:center` => CSS: `float:none`.
-					float: alignment === 'center' ? 'none' : alignment
+			view: alignment => {
+				if ( alignment === 'blockLeft' ) {
+					return ( {
+						key: 'style',
+						value: {
+							'margin-left': '0px'
+						}
+					} );
 				}
-			} ),
+
+				if ( alignment === 'blockRight' ) {
+					return ( {
+						key: 'style',
+						value: {
+							'margin-right': '0px'
+						}
+					} );
+				}
+
+				return ( {
+					key: 'style',
+					value: {
+					// Model: `alignment:center` => CSS: `float:none`.
+						float: alignment === 'center' ? 'none' : alignment
+					}
+				} );
+			},
 			converterPriority: 'high'
 		} );
 
@@ -206,6 +227,41 @@ function enableAlignmentProperty( schema, conversion, defaultValue ) {
 					const align = viewElement.getAttribute( 'align' );
 
 					return align === defaultValue ? null : align;
+				}
+			}
+		} )
+
+		// Support for the `margin` attribute as the backward compatibility while pasting from other sources.
+		.attributeToAttribute( {
+			view: {
+				name: /^(table|figure)$/,
+				styles: {
+					'margin-left': MARGIN_VALUES_REG_EXP
+				}
+			},
+			model: {
+				name: 'table',
+				key: 'tableAlignment',
+				value: viewElement => {
+					const marginLeft = viewElement.getStyle( 'margin-left' );
+					return ( marginLeft === '0' || marginLeft === '0px' ) ? 'blockLeft' : null;
+				}
+			}
+		} )
+
+		.attributeToAttribute( {
+			view: {
+				name: /^(table|figure)$/,
+				styles: {
+					'margin-right': MARGIN_VALUES_REG_EXP
+				}
+			},
+			model: {
+				name: 'table',
+				key: 'tableAlignment',
+				value: viewElement => {
+					const marginRight = viewElement.getStyle( 'margin-right' );
+					return ( marginRight === '0' || marginRight === '0px' ) ? 'blockRight' : null;
 				}
 			}
 		} );
