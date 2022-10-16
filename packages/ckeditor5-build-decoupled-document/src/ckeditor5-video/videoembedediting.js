@@ -63,7 +63,7 @@ export default class VideoEmbedEditing extends Plugin {
 		schema.register( 'video', {
 			isObject: true,
 			allowWhere: '$block',
-			allowAttributes: [ 'value', 'height', 'width' ]
+			allowAttributes: [ 'value', 'height', 'width', 'align' ]
 		} );
 
 		editor.commands.add(
@@ -101,7 +101,8 @@ export default class VideoEmbedEditing extends Plugin {
 				return writer.createElement( 'video', {
 					value: viewElement.getChild( 0 ).getAttribute( 'src' ),
 					height: viewElement.getChild( 0 ).getAttribute( 'height' ),
-					width: viewElement.getChild( 0 ).getAttribute( 'width' )
+					width: viewElement.getChild( 0 ).getAttribute( 'width' ),
+					align: viewElement.getStyle( 'justify-content' ) || 'center'
 				} );
 			}
 		} );
@@ -112,8 +113,10 @@ export default class VideoEmbedEditing extends Plugin {
 				const url = modelElement.getAttribute( 'value' ) || '';
 				const height = modelElement.getAttribute( 'height' ) || 'auto';
 				const width = modelElement.getAttribute( 'width' ) || 'auto';
+				const align = modelElement.getAttribute( 'align' ) || 'center';
 				const embedElement = writer.createContainerElement( 'figure', {
-					class: 'video-embed'
+					class: 'video-embed',
+					style: `justify-content: ${ align }`
 				} );
 				writer.insert(
 					writer.createPositionAt( embedElement, 0 ),
@@ -129,7 +132,7 @@ export default class VideoEmbedEditing extends Plugin {
 
 		editor.conversion.for( 'editingDowncast' ).elementToElement( {
 			triggerBy: {
-				attributes: [ 'value', 'height', 'width' ]
+				attributes: [ 'value', 'height', 'width', 'align' ]
 			},
 			model: 'video',
 			view: ( modelElement, { writer } ) => {
@@ -202,12 +205,14 @@ export default class VideoEmbedEditing extends Plugin {
 						// This could be potentially pulled to a separate method called focusTextarea().
 						domContentWrapper.querySelector( 'input' ).focus();
 					},
-					save( newValue, newHeight, newWidth ) {
+					save( newValue, newHeight, newWidth, newAlign ) {
 						// If the value didn't change, we just cancel. If it changed,
 						// it's enough to update the model – the entire widget will be reconverted.
 						if ( newValue !== state.getRawHtmlValue() ||
-						newHeight !== state.getRawHtmlHeight() || newWidth !== state.getRawHtmlWidth() ) {
-							editor.execute( 'updateVideoEmbed', newValue, newHeight, newWidth );
+						newHeight !== state.getRawHtmlHeight() ||
+						newWidth !== state.getRawHtmlWidth() ||
+						newAlign != state.getRawHtmlAlign() ) {
+							editor.execute( 'updateVideoEmbed', newValue, newHeight, newWidth, newAlign );
 							this.cancel();
 							editor.editing.view.focus();
 						} else {
@@ -241,7 +246,8 @@ export default class VideoEmbedEditing extends Plugin {
 					isEditable: false,
 					getRawHtmlValue: () => modelElement.getAttribute( 'value' ) || '',
 					getRawHtmlHeight: () => modelElement.getAttribute( 'height' ) || 'auto',
-					getRawHtmlWidth: () => modelElement.getAttribute( 'width' ) || 'auto'
+					getRawHtmlWidth: () => modelElement.getAttribute( 'width' ) || 'auto',
+					getRawHtmlAlign: () => modelElement.getAttribute( 'align' ) || 'center'
 				};
 
 				props = {
@@ -251,8 +257,8 @@ export default class VideoEmbedEditing extends Plugin {
 					onEditClick() {
 						videoApi.makeEditable();
 					},
-					onSaveClick( newValue, newHeight, newWidth ) {
-						videoApi.save( newValue, newHeight, newWidth );
+					onSaveClick( newValue, newHeight, newWidth, newAlign ) {
+						videoApi.save( newValue, newHeight, newWidth, newAlign );
 					},
 					onCancelClick() {
 						videoApi.cancel();
@@ -282,6 +288,7 @@ export default class VideoEmbedEditing extends Plugin {
 			let domTextarea;
 			let domInputHeight;
 			let domInputWidth;
+			let domSelectAlign;
 
 			if ( state.isEditable ) {
 				const textareaProps = {
@@ -295,7 +302,7 @@ export default class VideoEmbedEditing extends Plugin {
 					props: textareaProps
 				} );
 
-				const domLabelHeight = createElement( domDocument, 'span', { class: 'video_style_label' }, '高度：' );
+				const domLabelHeight = createDomLabel( domDocument, '高度' );
 
 				domInputHeight = createDomInput( {
 					domDocument,
@@ -305,7 +312,7 @@ export default class VideoEmbedEditing extends Plugin {
 					}
 				} );
 
-				const domLabelWidth = createElement( domDocument, 'span', { class: 'video_style_label' }, '宽度：' );
+				const domLabelWidth = createDomLabel( domDocument, '宽度' );
 
 				domInputWidth = createDomInput( {
 					domDocument,
@@ -315,11 +322,21 @@ export default class VideoEmbedEditing extends Plugin {
 					}
 				} );
 
+				const domLabeAlign = createDomLabel( domDocument, '布局' );
+
+				domSelectAlign = createDomSelect( {
+					domDocument,
+					props: {
+						isDisabled: false,
+						value: state.getRawHtmlAlign()
+					}
+				} );
+
 				const domFormWrapper = createElement(
 					domDocument,
 					'div',
 					{ class: 'video_form_wrapper' },
-					[ domLabelHeight, domInputHeight, domLabelWidth, domInputWidth ]
+					[ domLabelHeight, domInputHeight, domLabelWidth, domInputWidth, domLabeAlign, domSelectAlign ]
 				);
 
 				domElement.append( domTextarea );
@@ -351,7 +368,7 @@ export default class VideoEmbedEditing extends Plugin {
 			const buttonsWrapperProps = {
 				onEditClick: props.onEditClick,
 				onSaveClick: () => {
-					props.onSaveClick( domTextarea.value, domInputHeight.value, domInputWidth.value );
+					props.onSaveClick( domTextarea.value, domInputHeight.value, domInputWidth.value, domSelectAlign.value );
 				},
 				onCancelClick: props.onCancelClick
 			};
@@ -430,10 +447,37 @@ export default class VideoEmbedEditing extends Plugin {
 			return domInput;
 		}
 
+		function createDomSelect( { domDocument, props } ) {
+			function createDomOptions( label, value ) {
+				return createElement( domDocument, 'option', {
+					value
+				}, label );
+			}
+
+			const domSelect = createElement( domDocument, 'select', {
+				name: 'align',
+				placeholder: '请选择',
+				class: 'ck ck-reset ck-input ck-input-text video-embed_align'
+			} );
+
+			domSelect.append( createDomOptions( '居左', 'left' ) );
+			domSelect.append( createDomOptions( '居中', 'center' ) );
+			domSelect.append( createDomOptions( '居右', 'right' ) );
+			domSelect.disabled = props.isDisabled;
+			domSelect.value = props.value;
+
+			return domSelect;
+		}
+
+		function createDomLabel( domDocument, label ) {
+			return createElement( domDocument, 'span', { class: 'video_style_label' }, `${ label }：` );
+		}
+
 		function createPreviewContainer( { domDocument, state, props, editor } ) {
 			const sanitizedOutput = props.sanitizeHtml( state.getRawHtmlValue() );
 			const sanitizedOutputHeight = props.sanitizeHtml( state.getRawHtmlHeight() );
 			const sanitizedOutputWidth = props.sanitizeHtml( state.getRawHtmlWidth() );
+			const sanitizedOutputAlign = props.sanitizeHtml( state.getRawHtmlAlign() );
 			const placeholderText =
 				state.getRawHtmlValue().length > 0 ?
 					t( 'No preview available' ) :
@@ -450,7 +494,8 @@ export default class VideoEmbedEditing extends Plugin {
 
 			const domPreviewContent = createElement( domDocument, 'div', {
 				class: 'video-embed__preview-content',
-				dir: editor.locale.contentLanguageDirection
+				dir: editor.locale.contentLanguageDirection,
+				style: `justify-content: ${ sanitizedOutputAlign.html }`
 			} );
 
 			domPreviewContent.innerHTML = `<video controls height="${ sanitizedOutputHeight.html }" width="${ sanitizedOutputWidth.html }">

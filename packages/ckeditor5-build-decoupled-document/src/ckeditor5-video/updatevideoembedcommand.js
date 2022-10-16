@@ -33,7 +33,7 @@ export default class UpdateVideoEmbedCommand extends Command {
    * @fires execute
    * @param {String} value video as a string.
    */
-	execute( value, height, width ) {
+	execute( value, height, width, align ) {
 		const model = this.editor.model;
 		const selection = model.document.selection;
 		const selectedRawHtmlElement = getSelectedRawHtmlModelWidget( selection );
@@ -42,6 +42,7 @@ export default class UpdateVideoEmbedCommand extends Command {
 			writer.setAttribute( 'value', value, selectedRawHtmlElement );
 			writer.setAttribute( 'height', height, selectedRawHtmlElement );
 			writer.setAttribute( 'width', width, selectedRawHtmlElement );
+			writer.setAttribute( 'align', align, selectedRawHtmlElement );
 		} );
 	}
 }

@@ -50,6 +50,7 @@
 	& .video-embed__preview-content {
 		width: 100%;
 		margin: auto;
+		display: flex;
 
 		/* Gives spacing to the small renderable elements, so they always cover the placeholder. */
 		border-collapse: separate;

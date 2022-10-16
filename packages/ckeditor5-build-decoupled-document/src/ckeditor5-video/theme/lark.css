@@ -142,6 +142,8 @@
 
 	& .video-embed_style {
 		margin-right: calc(var(--ck-spacing-standard) * 2);
+		min-width: 100px;
+		width: 100px;
 
 		&[disabled] {
 			background: var(--ck-video-embed-source-disabled-background);
@@ -150,6 +152,11 @@
 			-webkit-text-fill-color: var(--ck-video-embed-source-disabled-color);
 			opacity: 1;
 		}
+	}
+
+	& .video-embed_align {
+		width: 100px;
+		min-width: 100px;
 	}
 
 	/* The preview data container. */
@@ -167,11 +174,6 @@
 		box-sizing: border-box;
 		text-align: center;
 		background-color: var(--ck-color-base-foreground);
-
-		& > * {
-			margin-left: auto;
-			margin-right: auto;
-		}
 	}
 
 	& .video-embed__preview-placeholder {
